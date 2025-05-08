@@ -8,4 +8,4 @@ LIGHT_DEVICES = [
 ]
 
 F1MV_HOST = "localhost"
-F1MV_PORT = 9977
+F1MV_PORT = 10101

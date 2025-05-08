@@ -1,59 +1,59 @@
 # main.py
 
-import asyncio
-import websockets
-import json
+import requests
+import time
 from config import F1MV_HOST, F1MV_PORT
-from nanoleaf import flash_color, cycle_rainbow
+from overlay import show_color
 
-F1MV_WS_URL = f"ws://{F1MV_HOST}:{F1MV_PORT}/graphql"
+API_URL = f"http://{F1MV_HOST}:{F1MV_PORT}/api/graphql"
 
-GRAPHQL_SUBSCRIPTION = {
-    "type": "start",
-    "id": "1",
-    "payload": {
-        "query": """
-        subscription {
-            TrackStatus {
-                Status
-                Message
-            }
-        }
-        """,
-        "variables": {}
-    }
+HEADERS = {
+    "Content-Type": "application/json",
 }
 
-async def listen_for_events():
-    async with websockets.connect(F1MV_WS_URL) as websocket:
-        await websocket.send(json.dumps({"type": "connection_init"}))
-        await websocket.send(json.dumps(GRAPHQL_SUBSCRIPTION))
+QUERY = {
+    "query": """
+    {
+        f1LiveTimingState {
+            TrackStatus
+        }
+    }
+    """
+}
 
-        print("Listening for events...")
-        while True:
-            try:
-                response = await websocket.recv()
-                data = json.loads(response)
+def get_track_status():
+    try:
+        response = requests.post(API_URL, json=QUERY, headers=HEADERS)
+        if response.status_code == 200:
+            data = response.json()
+            return data["data"]["f1LiveTimingState"]["TrackStatus"]
+        else:
+            print(f"Error {response.status_code}: {response.text[:100]}")
+    except Exception as e:
+        print("Request failed:", e)
+    return None
 
-                if data.get("type") == "data":
-                    track_status = data["payload"]["data"]["TrackStatus"]
-                    status = track_status["Status"]
-                    message = track_status["Message"]
+def main():
+    print("Starting HTTP polling for TrackStatus...")
+    last_status = None
 
-                    print(f"Track Status: {message} (Code: {status})")
+    while True:
+        track_status = get_track_status()
+        print("📦 Raw track_status:", track_status)
+        if track_status:
+            status = track_status.get("Status")
+            message = track_status.get("Message", "Unknown")
 
-                    if status == "2":
-                        print("Yellow flag! Flashing yellow.")
-                        flash_color(hue=60)
-                    elif status == "4":
-                        print("Red flag! Flashing red.")
-                        flash_color(hue=0)
-                    elif status == "1":
-                        print("Green flag! Rainbow cycle!")
-                        cycle_rainbow()
+            if status != last_status:
+                print(f"⚠️ Track Status changed: {message} (Code: {status})")
+                last_status = status
 
-            except Exception as e:
-                print(f"WebSocket error: {e}")
-                break
+                # Trigger color overlay
+                show_color(status)
+            else:
+                print(f"Track Status unchanged: {message} (Code: {status})")
 
-asyncio.run(listen_for_events())
+        time.sleep(2)
+
+if __name__ == "__main__":
+    main()

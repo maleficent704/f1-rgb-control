@@ -1,56 +1,87 @@
-# F1 RGB Control
+# TrackStatus Visual Overlay
 
-🎨 Sync Nanoleaf RGB lighting with live Formula 1 race events using the F1 Multiviewer API.
+A lightweight Python desktop app that reacts to real-time Formula 1 track status by displaying fullscreen color overlays. These overlays are picked up by the Nanoleaf Desktop App’s screen mirroring feature to trigger ambient MAGRGB lighting reactions.
 
-## 🚀 Features
+---
 
-- Detect live race events: yellow/red/green flags
-- Flash Nanoleaf lights based on event triggers
-- Cycle colors for race highlights (e.g. green flag rainbow)
-- Multi-device Nanoleaf support
-- Modular, expandable Python project
+## 🧩 Purpose
 
-## 🔧 Requirements
+This project is an alternative to API-driven smart home reactions. Instead of using Matter or Alexa routines, it leverages simple on-screen color to drive lighting scenes based on track flags.
 
-- Python 3.7+
-- Nanoleaf light panels or strips
-- F1 Multiviewer running locally
-- Websocket access to F1MV GraphQL endpoint
+---
 
-## 📦 Installation
+## 🚦 Track Status → Visual Overlay
 
-```bash
-pip install requests websockets aiohttp
+| Track Status | Code | Overlay Color | Description              |
+| ------------ | ---- | ------------- | ------------------------ |
+| All Clear    | 1    | Green         | Rainbow/calm lighting    |
+| Yellow Flag  | 2    | Yellow        | Caution - flashing scene |
+| Red Flag     | 4    | Red           | Panic - intense red      |
+
+---
+
+## 📁 Project Structure
+
+```
+f1-rgb-control/
+├── main.py           # Polls Multiviewer for track status
+├── overlay.py        # Displays color overlay windows
+├── config.py         # Track status API settings
+└── README.md
 ```
 
-## 📁 File Structure
+---
 
-- `main.py`: Listens for F1MV events and triggers effects
-- `nanoleaf.py`: Light control helpers
-- `config.py`: Device IPs, tokens, and F1MV settings
+## 🛠️ Setup
 
-## ⚙️ Usage
+### Requirements
 
-1. Update `config.py` with your Nanoleaf IP(s) and auth token(s)
-2. Run the app:
+* Python 3.8+
+* Nanoleaf Desktop App with screen mirroring enabled
+
+### Install dependencies
+
+This app uses only Python standard libraries (`tkinter`, `threading`, `requests`). Just clone and run.
+
+### Run it
+
 ```bash
 python main.py
 ```
 
-## 🛣️ Roadmap
-
-- [ ] Add support for purple sectors and fastest laps
-- [ ] Track pit stop events
-- [ ] Display dashboard with driver stats
-- [ ] Alexa/Stream Deck voice & button integrations
-- [ ] Event replay assistant with highlight markers
-
-## 🧠 Built With
-
-- Python
-- Nanoleaf OpenAPI
-- F1 Multiviewer API
+Make sure the Nanoleaf Desktop App is actively mirroring the monitor where the overlays will appear.
 
 ---
 
-Enjoy race weekends with lightshow flair ✨
+## 🔧 Configuration
+
+Edit `config.py` to point to your Multiviewer local server:
+
+```python
+F1MV_HOST = "localhost"
+F1MV_PORT = 10101
+```
+
+---
+
+## 🧪 Future Enhancements
+
+* Add fading/pulsing effects
+* CLI triggers or hotkeys for testing
+* Stream Deck integration
+* Victory animation (multi-color blast)
+
+---
+
+## 🧑‍💻 Authors
+
+* Kelly Morris — project lead and developer
+* Sam — co-architect and future collaborator
+
+This app is part of the larger \[F1 Command Center Project].
+
+---
+
+## 💡 Inspiration
+
+Built to maximize race weekend immersion without relying on cloud APIs or proprietary smart home ecosystems. Everything happens locally, in real time.
